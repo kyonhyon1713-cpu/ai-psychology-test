@@ -38,19 +38,17 @@ export async function GET(
       );
     }
 
-    const shouldDownload = new URL(request.url).searchParams.has("download");
-    const dispositionFilename =
-      "filename=\"abstract-perception-result.png\"; " +
-      "filename*=UTF-8''%EB%82%B4%EB%A9%B4%EC%9D%98-%EA%B2%B0-%EA%B2%B0%EA%B3%BC-%EC%B9%B4%EB%93%9C.png";
+    const shouldDisplayInline = new URL(request.url).searchParams.has("inline");
+    const dispositionFilename = 'filename="abstract-perception-result.png"';
 
     return new NextResponse(image, {
       status: 200,
       headers: {
         "Content-Type": "image/png",
         "Content-Length": String(image.byteLength),
-        "Content-Disposition": shouldDownload
-          ? `attachment; ${dispositionFilename}`
-          : `inline; ${dispositionFilename}`,
+        "Content-Disposition": shouldDisplayInline
+          ? `inline; ${dispositionFilename}`
+          : `attachment; ${dispositionFilename}`,
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
       },

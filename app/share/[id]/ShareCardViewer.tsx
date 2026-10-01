@@ -4,19 +4,46 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type CardState = "loading" | "success" | "error";
-type SaveState = "idle" | "saving";
+type ActionState = "idle" | "saving" | "sharing";
+
+const DOWNLOAD_FILENAME = "abstract-perception-result.png";
+
+function usesManualImageSave() {
+  const userAgent = navigator.userAgent;
+  const isIos = /iPad|iPhone|iPod/i.test(userAgent);
+  const isIpadOs =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const isKnownInAppBrowser =
+    /FBAN|FBAV|Instagram|KAKAOTALK|NAVER|Line\//i.test(userAgent);
+
+  return isIos || isIpadOs || isKnownInAppBrowser;
+}
+
+function canShareImageFile(blob: Blob) {
+  if (
+    typeof navigator.share !== "function" ||
+    typeof navigator.canShare !== "function"
+  ) {
+    return false;
+  }
+
+  try {
+    const file = new File([blob], DOWNLOAD_FILENAME, { type: "image/png" });
+    return navigator.canShare({ files: [file] });
+  } catch {
+    return false;
+  }
+}
 
 export default function ShareCardViewer({ id }: { id: string }) {
   const [cardState, setCardState] = useState<CardState>("loading");
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [saveMessage, setSaveMessage] = useState("");
+  const [actionState, setActionState] = useState<ActionState>("idle");
+  const [actionMessage, setActionMessage] = useState("");
+  const [isFileShareSupported, setIsFileShareSupported] = useState(false);
   const cardUrlRef = useRef<string | null>(null);
   const cardBlobRef = useRef<Blob | null>(null);
-
-  const imageUrl = `/api/result-card/${id}`;
-  const downloadUrl = `${imageUrl}?download=1`;
 
   const replaceCardUrl = useCallback((nextUrl: string | null) => {
     if (cardUrlRef.current?.startsWith("blob:")) {
@@ -31,12 +58,13 @@ export default function ShareCardViewer({ id }: { id: string }) {
     async (signal?: AbortSignal) => {
       setCardState("loading");
       setErrorMessage("");
-      setSaveMessage("");
+      setActionMessage("");
+      setIsFileShareSupported(false);
       cardBlobRef.current = null;
       replaceCardUrl(null);
 
       try {
-        const response = await fetch(`/api/result-card/${id}`, {
+        const response = await fetch(`/api/result-card/${id}?inline=1`, {
           cache: "no-store",
           signal,
         });
@@ -61,6 +89,7 @@ export default function ShareCardViewer({ id }: { id: string }) {
         }
 
         cardBlobRef.current = blob;
+        setIsFileShareSupported(canShareImageFile(blob));
         const objectUrl = URL.createObjectURL(blob);
 
         if (signal?.aborted) {
@@ -106,58 +135,84 @@ export default function ShareCardViewer({ id }: { id: string }) {
   }, [loadCard]);
 
   async function saveCard() {
-    if (saveState === "saving" || !cardBlobRef.current) return;
+    if (actionState !== "idle" || !cardBlobRef.current) return;
 
-    setSaveState("saving");
-    setSaveMessage("");
+    setActionState("saving");
+    setActionMessage("");
 
-    const file = new File([cardBlobRef.current], "내면의-결-결과-카드.png", {
-      type: "image/png",
-    });
-    const isTouchDevice =
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia("(pointer: coarse)").matches;
-    const canShareFile =
-      isTouchDevice &&
-      typeof navigator.share === "function" &&
-      typeof navigator.canShare === "function" &&
-      navigator.canShare({ files: [file] });
-    const startDirectDownload = () => {
+    if (usesManualImageSave()) {
+      const manualSaveWindow = window.open(
+        `/share/${id}/save`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      setActionMessage(
+        manualSaveWindow
+          ? "새 화면에서 이미지를 길게 눌러 사진 앱에 저장해주세요."
+          : "새 화면을 열지 못했습니다. 팝업 허용 후 다시 시도해주세요."
+      );
+      setActionState("idle");
+      return;
+    }
+
+    let downloadObjectUrl: string | null = null;
+
+    try {
+      downloadObjectUrl = URL.createObjectURL(cardBlobRef.current);
       const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = "내면의-결-결과-카드.png";
+      anchor.href = downloadObjectUrl;
+      anchor.download = DOWNLOAD_FILENAME;
       anchor.rel = "noreferrer";
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
-    };
+      setActionMessage("PNG 파일 다운로드를 시작했습니다.");
+    } catch {
+      setActionMessage("사진을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      const objectUrlToRevoke = downloadObjectUrl;
 
-    if (canShareFile) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "내면의 결 결과 카드",
-          text: "나의 추상 이미지 성향 테스트 결과 카드",
-        });
-        setSaveMessage("열린 메뉴에서 이미지 저장을 선택할 수 있습니다.");
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          setSaveState("idle");
-          return;
-        }
-
-        startDirectDownload();
-        setSaveMessage("PNG 파일 다운로드를 시작했습니다.");
-      } finally {
-        setSaveState("idle");
+      if (objectUrlToRevoke) {
+        window.setTimeout(() => URL.revokeObjectURL(objectUrlToRevoke), 1000);
       }
 
+      setActionState("idle");
+    }
+  }
+
+  async function shareCard() {
+    if (
+      actionState !== "idle" ||
+      !cardBlobRef.current ||
+      !isFileShareSupported
+    ) {
       return;
     }
 
-    startDirectDownload();
-    setSaveMessage("PNG 파일 다운로드를 시작했습니다.");
-    setSaveState("idle");
+    setActionState("sharing");
+    setActionMessage("");
+
+    const file = new File([cardBlobRef.current], DOWNLOAD_FILENAME, {
+      type: "image/png",
+    });
+
+    try {
+      await navigator.share({
+        files: [file],
+        title: "내면의 결 결과 카드",
+        text: "나의 추상 이미지 성향 테스트 결과 카드",
+      });
+      setActionMessage("결과 카드 공유를 완료했습니다.");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setActionMessage("공유를 취소했습니다.");
+      } else {
+        setActionMessage("결과 카드를 공유하지 못했습니다.");
+      }
+    } finally {
+      setActionState("idle");
+    }
   }
 
   if (cardState === "loading") {
@@ -205,27 +260,29 @@ export default function ShareCardViewer({ id }: { id: string }) {
           className="primary-button shared-card-download"
           type="button"
           onClick={() => void saveCard()}
-          disabled={saveState === "saving"}
+          disabled={actionState !== "idle"}
         >
-          {saveState === "saving" ? "저장 준비 중..." : "결과 카드 저장하기"}
+          {actionState === "saving" ? "저장 준비 중..." : "사진 저장하기"}
         </button>
-        <a
+        <button
           className="secondary-button shared-card-open"
-          href={imageUrl}
-          target="_blank"
-          rel="noreferrer"
+          type="button"
+          onClick={() => void shareCard()}
+          disabled={actionState !== "idle" || !isFileShareSupported}
+          aria-describedby={!isFileShareSupported ? "share-support-hint" : undefined}
         >
-          PNG 직접 열기
-        </a>
+          {actionState === "sharing" ? "공유 준비 중..." : "공유하기"}
+        </button>
       </div>
-      {saveMessage && (
+      {actionMessage && (
         <p className="image-action-message" aria-live="polite">
-          {saveMessage}
+          {actionMessage}
         </p>
       )}
-      <p className="shared-card-hint">
-        휴대폰에서는 저장 메뉴가 열립니다. 인앱 브라우저에서 동작하지 않으면
-        PNG를 직접 연 뒤 이미지를 길게 눌러 저장해주세요.
+      <p className="shared-card-hint" id="share-support-hint">
+        {isFileShareSupported
+          ? "저장과 공유는 별도로 동작합니다."
+          : "이 브라우저는 이미지 파일 공유를 지원하지 않아 공유 버튼이 비활성화됩니다."}
       </p>
     </section>
   );

@@ -55,6 +55,8 @@ interface CardShareData {
   expiresAt: string;
 }
 
+const PRODUCTION_SHARE_ORIGIN = "https://ai-psychology-test.vercel.app";
+
 function isLoopbackUrl(value: string) {
   try {
     const hostname = new URL(value).hostname;
@@ -643,9 +645,13 @@ export default function ResultImagePage() {
         );
       }
 
-      // 현재 브라우저의 origin을 사용하므로 Vercel production에서는
-      // https://<배포도메인>/share/{id}가 되고, 개발 환경에서만 로컬 주소가 됩니다.
-      const url = new URL(data.sharePath, `${window.location.origin}/`).toString();
+      // Preview/개별 Deployment URL이 QR에 들어가지 않도록 production에서는
+      // 고정 Production alias를 사용하고, 개발 환경에서만 현재 origin을 사용합니다.
+      const shareOrigin =
+        process.env.NODE_ENV === "production"
+          ? PRODUCTION_SHARE_ORIGIN
+          : window.location.origin;
+      const url = new URL(data.sharePath, `${shareOrigin}/`).toString();
       const qrCode = await QRCode.toDataURL(url, {
         width: 240,
         margin: 2,

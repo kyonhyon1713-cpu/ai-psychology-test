@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Environment variables
+
+Copy `.env.example` to `.env.local` and configure these server-only values:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_KV_NAMESPACE_ID=
+```
+
+The Cloudflare API token needs Workers AI access and Workers KV Storage edit access. The KV namespace stores generated result-card PNG files for 24 hours so a QR link can be opened from another device. Do not prefix these variables with `NEXT_PUBLIC_`.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

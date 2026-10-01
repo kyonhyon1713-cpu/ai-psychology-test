@@ -786,6 +786,194 @@ main > a:first-of-type,
   color: var(--muted);
 }
 
+.result-card-tools {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(245, 245, 242, 0.1);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(233, 228, 216, 0.08), transparent 38%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.result-card-tools-header h2,
+.qr-share-copy h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.result-card-tools-header p,
+.qr-share-copy p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.qr-share-copy .qr-share-expiry {
+  font-size: 0.78rem;
+  opacity: 0.72;
+}
+
+.qr-share-url-block {
+  display: grid;
+  gap: 5px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(245, 245, 242, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.qr-share-url-block span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.qr-share-url-block a {
+  color: var(--foreground);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-color: rgba(245, 245, 242, 0.28);
+  text-underline-offset: 3px;
+}
+
+.qr-local-warning {
+  padding: 10px 12px;
+  border: 1px solid rgba(208, 164, 103, 0.28);
+  border-radius: 12px;
+  background: rgba(208, 164, 103, 0.08);
+  color: #dec398 !important;
+  font-size: 0.78rem !important;
+}
+
+.result-card-tool-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.result-card-tool-actions .primary-button,
+.result-card-tool-actions .secondary-button {
+  width: 100%;
+  min-width: 0;
+}
+
+.qr-share-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(11, 12, 16, 0.64);
+}
+
+.qr-code-wrap {
+  display: grid;
+  width: 216px;
+  max-width: 100%;
+  padding: 10px;
+  place-items: center;
+  border-radius: 18px;
+  background: #f5f2ea;
+}
+
+.qr-code-wrap img {
+  width: 100%;
+  height: auto;
+}
+
+.qr-share-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shared-card-shell {
+  width: min(760px, calc(100% - 40px));
+}
+
+.shared-card-header {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.shared-card-header h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  line-height: 1.08;
+}
+
+.shared-card-header > p:last-child {
+  max-width: 580px;
+  margin: 16px auto 0;
+  color: var(--muted-strong);
+  line-height: 1.75;
+}
+
+.shared-card-state,
+.shared-card-viewer {
+  width: min(100%, 620px);
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.shared-card-state {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  text-align: center;
+}
+
+.shared-card-state p {
+  margin: 0 0 18px;
+}
+
+.shared-card-image-wrap {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--bg);
+}
+
+.shared-card-image {
+  width: 100%;
+  height: auto;
+}
+
+.shared-card-save-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.shared-card-download,
+.shared-card-open {
+  width: 100%;
+  min-width: 0;
+}
+
+.shared-card-hint {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .result-actions {
   justify-content: center;
   margin-top: 28px;
@@ -1041,6 +1229,10 @@ main > a:first-of-type,
     min-height: 240px;
     padding: 22px 18px;
   }
+
+  .shared-card-shell {
+    width: min(100% - 32px, 760px);
+  }
 }
 
 @media (max-width: 520px) {
@@ -1105,6 +1297,35 @@ main > a:first-of-type,
     width: auto;
     padding: 0 12px;
     white-space: nowrap;
+  }
+
+  .result-card-tools {
+    padding: 18px;
+  }
+
+  .result-card-tool-actions,
+  .qr-share-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-code-wrap {
+    width: min(100%, 240px);
+    margin: 0 auto;
+  }
+
+  .qr-share-actions {
+    grid-column: 1;
+    flex-direction: column;
+  }
+
+  .shared-card-state,
+  .shared-card-viewer {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .shared-card-save-actions {
+    grid-template-columns: 1fr;
   }
 }
 

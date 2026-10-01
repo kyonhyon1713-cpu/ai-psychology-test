@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildImagePrompt } from "@/lib/imagePromptBuilder";
+import { createResultShareToken } from "@/lib/shareToken";
 import type { Trait } from "@/data/questions";
 
 interface NormalizedScores {
@@ -155,6 +156,7 @@ export async function POST(request: Request) {
     }
 
     const imageBuffer = Buffer.from(imageBase64, "base64");
+    const shareToken = createResultShareToken(apiToken);
 
     return new NextResponse(imageBuffer, {
       status: 200,
@@ -162,6 +164,7 @@ export async function POST(request: Request) {
         "Content-Type": "image/jpeg",
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
+        "X-Result-Share-Token": shareToken,
       },
     });
   } catch (error: unknown) {

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import QRCode from "qrcode";
 
 import {
   useCallback,
@@ -12,6 +13,7 @@ import {
 
 import type { Trait } from "@/data/questions";
 import type { CalculatedResult } from "@/lib/scoring";
+import { createResultCardPng } from "@/lib/resultCard";
 
 import {
   getResultTypeProfile,
@@ -44,6 +46,24 @@ type ImageState =
   | "loading"
   | "success"
   | "error";
+
+type CardAction = "save" | "qr" | null;
+
+interface CardShareData {
+  url: string;
+  qrCode: string;
+  expiresAt: string;
+}
+
+function isLoopbackUrl(value: string) {
+  try {
+    const hostname = new URL(value).hostname;
+
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  } catch {
+    return false;
+  }
+}
 
 function isStoredResult(
   value: unknown
@@ -114,10 +134,19 @@ export default function ResultImagePage() {
     setImageActionMessage,
   ] = useState("");
 
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [cardAction, setCardAction] = useState<CardAction>(null);
+  const [cardActionMessage, setCardActionMessage] = useState("");
+  const [cardShareData, setCardShareData] =
+    useState<CardShareData | null>(null);
+  const [isQrVisible, setIsQrVisible] = useState(false);
+
   const hasInitialized = useRef(false);
   const isGeneratingRef = useRef(false);
   const activeRequestRef = useRef<AbortController | null>(null);
   const resultImageRef = useRef<string | null>(null);
+  const resultCardBlobRef = useRef<Blob | null>(null);
+  const isCardActionRunningRef = useRef(false);
 
   const replaceResultImage = useCallback((nextImage: string | null) => {
     const previousImage = resultImageRef.current;
@@ -139,7 +168,7 @@ export default function ResultImagePage() {
       async (
         resultData: CalculatedResult
       ) => {
-        if (isGeneratingRef.current) {
+        if (isGeneratingRef.current || isCardActionRunningRef.current) {
           return;
         }
 
@@ -150,6 +179,11 @@ export default function ResultImagePage() {
         setImageState("loading");
         setImageErrorMessage("");
         setImageActionMessage("");
+        setShareToken(null);
+        setCardActionMessage("");
+        setCardShareData(null);
+        setIsQrVisible(false);
+        resultCardBlobRef.current = null;
         replaceResultImage(null);
 
         try {
@@ -205,6 +239,10 @@ export default function ResultImagePage() {
           const blob =
             await response.blob();
 
+          const nextShareToken = response.headers.get(
+            "X-Result-Share-Token"
+          );
+
           if (
             !blob.size ||
             !blob.type.startsWith(
@@ -225,6 +263,7 @@ export default function ResultImagePage() {
           }
 
           replaceResultImage(imageUrl);
+          setShareToken(nextShareToken);
           setImageState("success");
         } catch (error) {
           if (controller.signal.aborted) {
@@ -312,7 +351,7 @@ export default function ResultImagePage() {
      이미지 저장
   ========================= */
 
-  function downloadBlob(blob: Blob) {
+  function downloadBlob(blob: Blob, filename = "내면의-풍경.png") {
     const objectUrl =
       URL.createObjectURL(blob);
 
@@ -321,8 +360,7 @@ export default function ResultImagePage() {
 
     anchor.href = objectUrl;
 
-    anchor.download =
-      "내면의-풍경.png";
+    anchor.download = filename;
 
     document.body.appendChild(
       anchor
@@ -520,6 +558,134 @@ export default function ResultImagePage() {
   const secondTrait =
     result.topTraits[1];
 
+  async function getResultCardBlob() {
+    if (!resultImage) {
+      throw new Error("먼저 내면 풍경 이미지를 생성해주세요.");
+    }
+
+    if (resultCardBlobRef.current) {
+      return resultCardBlobRef.current;
+    }
+
+    const cardBlob = await createResultCardPng({
+      resultType: profile.name,
+      topTraits: [traitLabels[firstTrait], traitLabels[secondTrait]],
+      summary: profile.summary,
+      imageUrl: resultImage,
+    });
+
+    resultCardBlobRef.current = cardBlob;
+    return cardBlob;
+  }
+
+  async function saveResultCard() {
+    if (cardAction || imageAction || isCardActionRunningRef.current) return;
+
+    isCardActionRunningRef.current = true;
+    setCardAction("save");
+    setCardActionMessage("");
+
+    try {
+      const cardBlob = await getResultCardBlob();
+      downloadBlob(cardBlob, "내면의-결-결과-카드.png");
+      setCardActionMessage("결과 카드를 저장했습니다.");
+    } catch (error) {
+      setCardActionMessage(
+        error instanceof Error
+          ? error.message
+          : "결과 카드를 저장하지 못했습니다."
+      );
+    } finally {
+      isCardActionRunningRef.current = false;
+      setCardAction(null);
+    }
+  }
+
+  async function showPhoneQr() {
+    if (cardAction || imageAction || isCardActionRunningRef.current) return;
+
+    if (cardShareData) {
+      setIsQrVisible(true);
+      return;
+    }
+
+    if (!shareToken) {
+      setCardActionMessage(
+        "휴대폰 전송 정보를 만들 수 없습니다. 이미지를 다시 생성해주세요."
+      );
+      return;
+    }
+
+    isCardActionRunningRef.current = true;
+    setCardAction("qr");
+    setCardActionMessage("");
+
+    try {
+      const cardBlob = await getResultCardBlob();
+      const response = await fetch("/api/result-card-share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "image/png",
+          "X-Result-Share-Token": shareToken,
+        },
+        body: cardBlob,
+      });
+
+      const data = (await response.json()) as {
+        sharePath?: string;
+        expiresAt?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !data.sharePath || !data.expiresAt) {
+        throw new Error(
+          data.error ?? "휴대폰 전송 링크를 만들지 못했습니다."
+        );
+      }
+
+      // 현재 브라우저의 origin을 사용하므로 Vercel production에서는
+      // https://<배포도메인>/share/{id}가 되고, 개발 환경에서만 로컬 주소가 됩니다.
+      const url = new URL(data.sharePath, `${window.location.origin}/`).toString();
+      const qrCode = await QRCode.toDataURL(url, {
+        width: 240,
+        margin: 2,
+        errorCorrectionLevel: "M",
+        color: {
+          dark: "#17191fff",
+          light: "#f5f2eaff",
+        },
+      });
+
+      setCardShareData({
+        url,
+        qrCode,
+        expiresAt: data.expiresAt,
+      });
+      setIsQrVisible(true);
+      setCardActionMessage("QR 코드가 준비되었습니다.");
+    } catch (error) {
+      setCardActionMessage(
+        error instanceof Error
+          ? error.message
+          : "휴대폰 전송 링크를 만들지 못했습니다."
+      );
+    } finally {
+      isCardActionRunningRef.current = false;
+      setCardAction(null);
+    }
+  }
+
+  async function copyShareLink() {
+    if (!cardShareData) return;
+
+    try {
+      await navigator.clipboard.writeText(cardShareData.url);
+      setCardActionMessage("공유 링크를 복사했습니다.");
+    } catch {
+      setCardActionMessage("링크를 복사하지 못했습니다. QR 코드를 이용해주세요.");
+    }
+  }
+
   /* =========================
      화면
   ========================= */
@@ -702,7 +868,118 @@ export default function ResultImagePage() {
                 </p>
               </section>
 
-              {/* 저장/공유 */}
+              {/* 결과 카드 저장/휴대폰 전송 */}
+
+              <section
+                className="result-card-tools"
+                aria-labelledby="result-card-tools-heading"
+              >
+                <div className="result-card-tools-header">
+                  <span className="profile-eyebrow">TAKE IT WITH YOU</span>
+                  <h2 id="result-card-tools-heading">결과 카드를 간직하세요</h2>
+                  <p>
+                    결과 유형과 상위 성향, AI 이미지만 담은 한 장의 PNG 카드로
+                    저장할 수 있어요.
+                  </p>
+                </div>
+
+                <div className="result-card-tool-actions">
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => void saveResultCard()}
+                    disabled={cardAction !== null || imageAction !== null}
+                  >
+                    {cardAction === "save"
+                      ? "카드 만드는 중..."
+                      : "결과 카드 저장하기"}
+                  </button>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => void showPhoneQr()}
+                    disabled={cardAction !== null || imageAction !== null}
+                  >
+                    {cardAction === "qr"
+                      ? "QR 준비 중..."
+                      : "휴대폰으로 가져가기"}
+                  </button>
+                </div>
+
+                {cardActionMessage && (
+                  <p className="image-action-message" aria-live="polite">
+                    {cardActionMessage}
+                  </p>
+                )}
+
+                {isQrVisible && cardShareData && (
+                  <div className="qr-share-panel" aria-live="polite">
+                    <div className="qr-share-copy">
+                      <span className="profile-eyebrow">SCAN WITH YOUR PHONE</span>
+                      <h3>휴대폰 카메라로 QR을 스캔하세요</h3>
+                      <p>
+                        휴대폰에서 결과 카드를 열어 PNG로 저장할 수 있습니다. 링크는
+                        24시간 후 자동으로 만료됩니다.
+                      </p>
+                      <p className="qr-share-expiry">
+                        만료 예정: {new Date(cardShareData.expiresAt).toLocaleString("ko-KR")}
+                      </p>
+                      <div className="qr-share-url-block">
+                        <span>QR에 포함된 주소</span>
+                        <a
+                          href={cardShareData.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {cardShareData.url}
+                        </a>
+                      </div>
+                      {isLoopbackUrl(cardShareData.url) && (
+                        <p className="qr-local-warning" role="alert">
+                          현재 QR은 localhost 주소입니다. 휴대폰에서는 연결되지
+                          않습니다. Vercel 배포 주소에서 다시 생성하거나, 같은
+                          Wi-Fi에서 이 페이지를 PC의 네트워크 주소로 열어주세요.
+                        </p>
+                      )}
+                    </div>
+                    <div className="qr-code-wrap">
+                      <Image
+                        src={cardShareData.qrCode}
+                        alt="휴대폰에서 결과 카드를 여는 QR 코드"
+                        width={240}
+                        height={240}
+                        unoptimized
+                      />
+                    </div>
+                    <div className="qr-share-actions">
+                      <a
+                        className="secondary-button"
+                        href={cardShareData.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        공유 페이지 미리보기
+                      </a>
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => void copyShareLink()}
+                      >
+                        링크 복사하기
+                      </button>
+                      <button
+                        className="ghost-button"
+                        type="button"
+                        onClick={() => setIsQrVisible(false)}
+                      >
+                        QR 닫기
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* AI 원본 이미지 저장/공유 */}
 
               <div className="image-utility-actions">
                 <button
@@ -712,13 +989,13 @@ export default function ResultImagePage() {
                     void shareResultImage()
                   }
                   disabled={
-                    imageAction !== null
+                    imageAction !== null || cardAction !== null
                   }
                 >
                   {imageAction ===
                   "share"
                     ? "공유 준비 중..."
-                    : "공유하기"}
+                    : "AI 이미지 공유하기"}
                 </button>
 
                 <button
@@ -728,13 +1005,13 @@ export default function ResultImagePage() {
                     void saveResultImage()
                   }
                   disabled={
-                    imageAction !== null
+                    imageAction !== null || cardAction !== null
                   }
                 >
                   {imageAction ===
                   "save"
                     ? "저장 중..."
-                    : "저장하기"}
+                    : "AI 이미지만 저장하기"}
                 </button>
               </div>
 
@@ -756,7 +1033,7 @@ export default function ResultImagePage() {
                       result
                     )
                   }
-                  disabled={imageAction !== null}
+                  disabled={imageAction !== null || cardAction !== null}
                 >
                   이미지 다시 생성하기
                 </button>

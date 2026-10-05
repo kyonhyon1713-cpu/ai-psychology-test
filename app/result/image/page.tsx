@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 
 import {
@@ -103,6 +104,8 @@ function isStoredResult(
 }
 
 export default function ResultImagePage() {
+  const router = useRouter();
+
   const [result, setResult] =
     useState<CalculatedResult | null>(
       null
@@ -692,6 +695,11 @@ export default function ResultImagePage() {
     }
   }
 
+  function returnToHome() {
+    sessionStorage.removeItem(RESULT_STORAGE_KEY);
+    router.replace("/");
+  }
+
   /* =========================
      화면
   ========================= */
@@ -1085,6 +1093,13 @@ export default function ResultImagePage() {
         >
           ← 결과 해석으로 돌아가기
         </Link>
+        <button
+          className="ghost-button"
+          type="button"
+          onClick={returnToHome}
+        >
+          처음으로 돌아가기
+        </button>
       </div>
     </main>
   );

@@ -356,6 +356,12 @@ p {
   background: var(--surface);
 }
 
+@media (min-width: 701px) {
+  .question-image-wrap {
+    align-self: center;
+  }
+}
+
 .question-image {
   width: 100%;
   height: 100%;

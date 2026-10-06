@@ -124,15 +124,15 @@ export async function createResultCardPng({
   }
 
   const background = context.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
-  background.addColorStop(0, "#0b0c10");
-  background.addColorStop(1, "#111319");
+  background.addColorStop(0, "#d5dfe5");
+  background.addColorStop(1, "#cbd8e0");
   context.fillStyle = background;
   context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-  drawRoundedRect(context, 34, 34, 832, 1132, 34);
-  context.fillStyle = "#17191f";
+  drawRoundedRect(context, 34, 34, 832, 1132, 6);
+  context.fillStyle = "rgba(225, 233, 237, 0.38)";
   context.fill();
-  context.strokeStyle = "rgba(245, 245, 242, 0.14)";
+  context.strokeStyle = "rgba(51, 45, 39, 0.76)";
   context.lineWidth = 2;
   context.stroke();
 
@@ -140,8 +140,8 @@ export async function createResultCardPng({
   const contentWidth = 736;
   const fontFamily = '"Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif';
 
-  context.fillStyle = "#f5f5f2";
-  context.font = `800 56px ${fontFamily}`;
+  context.fillStyle = "#332d27";
+  context.font = `500 56px ${fontFamily}`;
   const titleLines = wrapText(context, resultType, contentWidth, 2);
   const titleStartY = 124;
   const titleLineHeight = 66;
@@ -156,19 +156,19 @@ export async function createResultCardPng({
 
   topTraits.forEach((trait, index) => {
     const pillX = contentX + index * (pillWidth + 20);
-    drawRoundedRect(context, pillX, traitsY, pillWidth, pillHeight, 26);
-    context.fillStyle = index === 0 ? "#e9e4d8" : "rgba(245, 245, 242, 0.09)";
+    drawRoundedRect(context, pillX, traitsY, pillWidth, pillHeight, 3);
+    context.fillStyle = index === 0 ? "#332d27" : "rgba(255, 255, 255, 0.13)";
     context.fill();
-    context.strokeStyle = "rgba(245, 245, 242, 0.16)";
+    context.strokeStyle = "rgba(51, 45, 39, 0.6)";
     context.lineWidth = 1;
     context.stroke();
 
-    context.fillStyle = index === 0 ? "#1a1b20" : "#f5f5f2";
-    context.font = `750 22px ${fontFamily}`;
+    context.fillStyle = index === 0 ? "#dbe4e8" : "#332d27";
+    context.font = `600 22px ${fontFamily}`;
     context.fillText(`TOP ${index + 1}  ${trait}`, pillX + 22, traitsY + 34);
   });
 
-  context.fillStyle = "rgba(245, 245, 242, 0.78)";
+  context.fillStyle = "rgba(51, 45, 39, 0.78)";
   context.font = `500 23px ${fontFamily}`;
   const oneLineDescription =
     summary.trim().match(/^.*?[.!?](?:\s|$)/u)?.[0]?.trim() ?? summary.trim();
@@ -185,17 +185,17 @@ export async function createResultCardPng({
   const imageSize = Math.min(contentWidth, footerTop - imageY - 28);
   const imageX = (CARD_WIDTH - imageSize) / 2;
 
-  drawRoundedRect(context, imageX, imageY, imageSize, imageSize, 28);
+  drawRoundedRect(context, imageX, imageY, imageSize, imageSize, 3);
   context.save();
   context.clip();
   context.drawImage(sourceImage, imageX, imageY, imageSize, imageSize);
   context.restore();
-  context.strokeStyle = "rgba(245, 245, 242, 0.12)";
+  context.strokeStyle = "rgba(51, 45, 39, 0.6)";
   context.lineWidth = 2;
   context.stroke();
 
-  context.fillStyle = "rgba(245, 245, 242, 0.5)";
-  context.font = `800 16px ${fontFamily}`;
+  context.fillStyle = "rgba(51, 45, 39, 0.58)";
+  context.font = `600 16px ${fontFamily}`;
   context.letterSpacing = "3px";
   context.textAlign = "center";
   context.fillText("ABSTRACT PERCEPTION TEST", CARD_WIDTH / 2, 1136);

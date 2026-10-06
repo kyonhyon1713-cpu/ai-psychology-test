@@ -825,6 +825,26 @@ export default function ResultImagePage() {
                 />
               </div>
 
+              <section className="image-result-meta" aria-label="이미지 결과 정보">
+                <div className="image-result-type">
+                  <span className="profile-eyebrow">RESULT</span>
+                  <h2>{profile.name}</h2>
+                </div>
+                <div className="image-result-traits">
+                  <span className="profile-eyebrow">TOP TRAITS</span>
+                  <ol>
+                    <li>
+                      <span>01</span>
+                      <strong>{traitLabels[firstTrait]}</strong>
+                    </li>
+                    <li>
+                      <span>02</span>
+                      <strong>{traitLabels[secondTrait]}</strong>
+                    </li>
+                  </ol>
+                </div>
+              </section>
+
               {/* 이미지 설명 */}
 
               <section

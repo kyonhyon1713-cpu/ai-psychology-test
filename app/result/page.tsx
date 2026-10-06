@@ -157,7 +157,7 @@ export default function ResultPage() {
 
       <header className="result-header">
         <p className="result-overline">
-          YOUR INNER LANDSCAPE
+          YOUR PERCEPTION TYPE
         </p>
 
         <h1>{profile.name}</h1>
@@ -165,6 +165,21 @@ export default function ResultPage() {
         <p className="result-summary">
           {profile.summary}
         </p>
+
+        <div className="result-top-traits" aria-label="상위 두 성향">
+          {result.topTraits.map((trait, index) => (
+            <div className="result-top-trait" key={trait}>
+              <span className="result-top-rank">
+                TOP {String(index + 1).padStart(2, "0")}
+              </span>
+              <div className="result-top-value">
+                <span>{trait.toUpperCase()}</span>
+                <strong>{traitLabels[trait]}</strong>
+                <b>{result.normalizedScores[trait]}</b>
+              </div>
+            </div>
+          ))}
+        </div>
       </header>
 
       {/* 상세 성향 */}

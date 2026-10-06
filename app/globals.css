@@ -169,7 +169,7 @@ p {
 .home-card {
   display: flex;
   width: 100%;
-  min-height: min(790px, calc(100svh - 48px));
+  min-height: min(680px, calc(100svh - 48px));
   flex-direction: column;
   padding: 22px 0 0;
   border-top: 1px solid var(--text);
@@ -193,8 +193,8 @@ p {
 .home-mark {
   position: relative;
   width: 100%;
-  height: clamp(88px, 18vw, 132px);
-  margin: 30px 0 8px;
+  height: clamp(72px, 14vw, 100px);
+  margin: 24px 0 8px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -203,19 +203,19 @@ p {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: clamp(44px, 9vw, 66px);
-  height: clamp(44px, 9vw, 66px);
+  width: clamp(34px, 7vw, 50px);
+  height: clamp(34px, 7vw, 50px);
   border: 1px solid var(--text);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
 
 .home-mark span:nth-child(2) {
-  transform: translate(calc(-50% - 26px), -50%);
+  transform: translate(calc(-50% - 20px), -50%);
 }
 
 .home-mark span:nth-child(3) {
-  transform: translate(calc(-50% + 26px), -50%);
+  transform: translate(calc(-50% + 20px), -50%);
 }
 
 .home-shell h1 {
@@ -227,8 +227,8 @@ p {
 }
 
 .home-lead {
-  margin: 34px 0 0;
-  padding: 16px 0 18px;
+  margin: 24px 0 0;
+  padding: 14px 0 16px;
   border-top: 1px solid var(--text);
   border-bottom: 1px solid var(--text);
   font-size: clamp(0.9rem, 2vw, 1rem);
@@ -237,7 +237,7 @@ p {
 
 .home-meta {
   align-self: flex-end;
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   font-size: 0.72rem;
   font-style: italic;
   letter-spacing: 0.08em;
@@ -245,7 +245,7 @@ p {
 
 .home-cta {
   width: 100%;
-  min-height: 64px;
+  min-height: 58px;
   justify-content: space-between;
   margin-top: auto;
   border-right: 0;
@@ -258,10 +258,10 @@ p {
 
 .disclaimer {
   margin: 0 !important;
-  padding: 14px 0;
+  padding: 11px 0;
   border-top: 1px solid var(--line);
-  color: var(--muted) !important;
-  font-size: 0.68rem !important;
+  color: rgba(51, 45, 39, 0.45) !important;
+  font-size: 0.62rem !important;
   line-height: 1.55;
 }
 
@@ -335,13 +335,14 @@ p {
 
 .question-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 34px;
+  align-items: center;
   min-width: 0;
 }
 
 .question-image-wrap {
-  width: min(100%, 590px);
+  width: 100%;
   aspect-ratio: 1;
   margin: 0 auto;
   overflow: hidden;
@@ -362,9 +363,9 @@ p {
 }
 
 .question-title {
-  max-width: 690px;
-  margin: 8px 0 28px !important;
-  font-size: clamp(1.85rem, 5vw, 3rem);
+  max-width: 100%;
+  margin: 8px 0 22px !important;
+  font-size: clamp(1.75rem, 2.7vw, 2.2rem);
   font-weight: 420;
   letter-spacing: -0.055em;
   line-height: 1.12;
@@ -574,7 +575,7 @@ p {
 .profile-section-header p {
   margin: 0;
   align-self: end;
-  font-size: 0.88rem;
+  font-size: 0.94rem;
   line-height: 1.75;
 }
 
@@ -591,14 +592,14 @@ p {
 .profile-card,
 .profile-list-card {
   min-width: 0;
-  padding: 22px 22px 26px 0;
+  padding: 26px 26px 32px 0;
   background: transparent;
 }
 
 .profile-card:nth-child(even),
 .profile-list-card:nth-child(even) {
   padding-right: 0;
-  padding-left: 22px;
+  padding-left: 26px;
   border-left: 1px solid var(--line);
 }
 
@@ -610,7 +611,7 @@ p {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .profile-card-title h3 {
@@ -627,7 +628,7 @@ p {
 
 .profile-card p,
 .profile-list-card li {
-  font-size: 0.9rem;
+  font-size: 1.02rem;
   line-height: 1.85;
 }
 
@@ -643,7 +644,7 @@ p {
 
 .profile-list-card li {
   position: relative;
-  padding: 9px 0 9px 20px;
+  padding: 11px 0 11px 20px;
 }
 
 .profile-list-card li + li {
@@ -652,7 +653,7 @@ p {
 
 .profile-list-card li::before {
   position: absolute;
-  top: 9px;
+  top: 11px;
   left: 0;
   content: "—";
 }
@@ -711,7 +712,7 @@ p {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: "name score" "track track";
-  gap: 10px 14px;
+  gap: 14px 18px;
   align-items: center;
   padding: 13px 0;
   border-top: 1px solid var(--line);
@@ -767,13 +768,24 @@ p {
 }
 
 .image-card {
-  margin-top: 30px !important;
+  margin-top: 36px !important;
+  padding-top: 30px;
+  padding-bottom: 30px;
   text-align: left !important;
+}
+
+.image-card:not(.image-generator-card) .image-card-header h2 {
+  font-size: clamp(1.9rem, 4.6vw, 2.8rem);
 }
 
 .image-card .primary-button {
   width: 100%;
   margin-top: 8px;
+}
+
+.image-card:not(.image-generator-card) .primary-button {
+  min-height: 56px;
+  margin-top: 12px;
 }
 
 .result-actions {
@@ -1111,7 +1123,7 @@ p {
   }
 
   .home-card {
-    min-height: calc(100svh - 32px);
+    min-height: min(680px, calc(100svh - 32px));
   }
 
   .test-shell {
@@ -1124,6 +1136,7 @@ p {
   }
 
   .question-grid {
+    grid-template-columns: 1fr;
     gap: 22px;
   }
 
@@ -1154,7 +1167,7 @@ p {
   .profile-card:nth-child(even),
   .profile-list-card,
   .profile-list-card:nth-child(even) {
-    padding: 18px 0 22px;
+    padding: 22px 0 26px;
     border-left: 0;
   }
 

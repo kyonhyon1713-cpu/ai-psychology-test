@@ -268,8 +268,13 @@ p {
 /* ===== Test as an exhibition plate ===== */
 
 .test-shell {
+  --test-space-xs: 6px;
+  --test-space-sm: 12px;
+  --test-space-md: 20px;
+  --test-space-lg: 30px;
   width: min(800px, calc(100% - 40px));
   padding-top: 0;
+  padding-bottom: 56px;
 }
 
 .test-header {
@@ -278,10 +283,10 @@ p {
   top: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px 18px;
+  gap: 8px 18px;
   align-items: end;
-  margin-bottom: 26px;
-  padding: 18px 0 13px;
+  margin-bottom: var(--test-space-md);
+  padding: 16px 0 12px;
   border-bottom: 1px solid var(--text);
   background: rgba(207, 219, 226, 0.96);
   backdrop-filter: blur(10px);
@@ -289,7 +294,7 @@ p {
 
 .brand-link {
   width: fit-content;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.08em;
 }
@@ -297,14 +302,14 @@ p {
 .progress-count {
   margin: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
 }
 
 .progress-count strong {
   color: var(--text);
-  font-size: 2.5rem;
+  font-size: 2.15rem;
   font-weight: 380;
   letter-spacing: -0.06em;
   line-height: 0.8;
@@ -312,6 +317,7 @@ p {
 
 .test-header .progress-track {
   grid-column: 1 / -1;
+  margin-top: 2px;
 }
 
 .progress-track {
@@ -336,8 +342,8 @@ p {
 .question-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 34px;
-  align-items: center;
+  gap: var(--test-space-lg);
+  align-items: start;
   min-width: 0;
 }
 
@@ -364,11 +370,11 @@ p {
 
 .question-title {
   max-width: 100%;
-  margin: 8px 0 22px !important;
-  font-size: clamp(1.75rem, 2.7vw, 2.2rem);
+  margin: var(--test-space-xs) 0 18px !important;
+  font-size: clamp(1.65rem, 2.5vw, 2.05rem);
   font-weight: 420;
-  letter-spacing: -0.055em;
-  line-height: 1.12;
+  letter-spacing: -0.045em;
+  line-height: 1.16;
 }
 
 .options-list {
@@ -383,16 +389,16 @@ p {
 .option-card {
   position: relative;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 16px;
-  gap: 12px;
+  grid-template-columns: 38px minmax(0, 1fr) 14px;
+  column-gap: var(--test-space-sm);
   min-width: 0;
-  min-height: 60px;
+  min-height: 58px;
   align-items: center;
-  padding: 11px 8px 11px 0;
+  padding: 10px 8px 10px 0;
   border-bottom: 1px solid var(--line);
   color: var(--text);
   cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, padding 140ms ease;
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .option-card::after {
@@ -401,15 +407,15 @@ p {
   border: 1px solid currentColor;
   border-radius: 50%;
   content: "";
+  justify-self: end;
+  margin-right: 2px;
 }
 
 .option-card:hover {
-  padding-left: 8px;
   background: rgba(255, 255, 255, 0.2);
 }
 
 .option-card.selected {
-  padding-left: 8px;
   background: var(--text);
   color: var(--bg-soft);
 }
@@ -438,7 +444,7 @@ p {
   min-width: 0;
   color: inherit;
   font-size: 0.94rem;
-  line-height: 1.55;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
@@ -448,9 +454,9 @@ p {
   bottom: 0;
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 28px;
-  padding: 14px 0;
+  gap: var(--test-space-sm);
+  margin-top: var(--test-space-md);
+  padding: var(--test-space-sm) 0;
   border-top: 1px solid var(--text);
   background: rgba(207, 219, 226, 0.96);
   backdrop-filter: blur(10px);
@@ -459,6 +465,11 @@ p {
 .test-nav .primary-button,
 .test-nav .secondary-button {
   min-width: 150px;
+}
+
+.test-nav .primary-button:disabled,
+.test-nav .secondary-button:disabled {
+  opacity: 0.52;
 }
 
 /* ===== Result poster ===== */
@@ -1131,13 +1142,13 @@ p {
   }
 
   .test-header {
-    margin-bottom: 20px;
-    padding-top: 14px;
+    margin-bottom: 16px;
+    padding-top: 12px;
   }
 
   .question-grid {
     grid-template-columns: 1fr;
-    gap: 22px;
+    gap: var(--test-space-md);
   }
 
   .question-image-wrap {
@@ -1146,7 +1157,7 @@ p {
   }
 
   .question-content {
-    padding-top: 14px;
+    padding-top: var(--test-space-sm);
   }
 
   .profile-section-header,
@@ -1278,7 +1289,7 @@ p {
 
   .option-card {
     grid-template-columns: 34px minmax(0, 1fr) 14px;
-    gap: 8px;
+    column-gap: 8px;
   }
 
   .option-text {

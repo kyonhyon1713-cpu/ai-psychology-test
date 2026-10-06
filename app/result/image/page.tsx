@@ -563,6 +563,16 @@ export default function ResultImagePage() {
   const secondTrait =
     result.topTraits[1];
 
+  const resultHeader = (
+    <header className="result-header">
+      <p className="result-overline">YOUR AI LANDSCAPE</p>
+      <h1>당신의 내면 풍경</h1>
+      <p className="result-summary">
+        <strong>{profile.name}</strong>의 성향을 하나의 추상적인 이미지로 표현합니다.
+      </p>
+    </header>
+  );
+
   async function getResultCardBlob() {
     if (!resultImage) {
       throw new Error("먼저 내면 풍경 이미지를 생성해주세요.");
@@ -705,24 +715,9 @@ export default function ResultImagePage() {
   ========================= */
 
   return (
-    <main className="result-shell">
+    <main className={`result-shell${imageState === "success" && resultImage ? " image-result-page" : ""}`}>
       {/* 헤더 */}
-
-      <header className="result-header">
-        <p className="result-overline">
-          YOUR AI LANDSCAPE
-        </p>
-
-        <h1>당신의 내면 풍경</h1>
-
-        <p className="result-summary">
-          <strong>
-            {profile.name}
-          </strong>
-          의 성향을 하나의 추상적인
-          이미지로 표현합니다.
-        </p>
-      </header>
+      {imageState !== "success" && resultHeader}
 
       {/* 이미지 영역 */}
 
@@ -813,7 +808,7 @@ export default function ResultImagePage() {
         {imageState ===
           "success" &&
           resultImage && (
-            <>
+            <div className="image-result-layout">
               <div className="generated-image-wrap">
                 <Image
                   className="generated-image"
@@ -825,190 +820,184 @@ export default function ResultImagePage() {
                 />
               </div>
 
-              <section className="image-result-meta" aria-label="이미지 결과 정보">
-                <div className="image-result-type">
-                  <span className="profile-eyebrow">RESULT</span>
-                  <h2>{profile.name}</h2>
-                </div>
-                <div className="image-result-traits">
-                  <span className="profile-eyebrow">TOP TRAITS</span>
-                  <ol>
-                    <li>
-                      <span>01</span>
-                      <strong>{traitLabels[firstTrait]}</strong>
-                    </li>
-                    <li>
-                      <span>02</span>
-                      <strong>{traitLabels[secondTrait]}</strong>
-                    </li>
-                  </ol>
-                </div>
-              </section>
+              <div className="image-result-details">
+                {resultHeader}
 
-              {/* 이미지 설명 */}
+                <section className="image-result-meta" aria-label="이미지 결과 정보">
+                  <div className="image-result-type">
+                    <span className="profile-eyebrow">RESULT</span>
+                    <h2>{profile.name}</h2>
+                  </div>
+                  <div className="image-result-traits">
+                    <span className="profile-eyebrow">TOP TRAITS</span>
+                    <ol>
+                      <li>
+                        <span>01</span>
+                        <strong>{traitLabels[firstTrait]}</strong>
+                      </li>
+                      <li>
+                        <span>02</span>
+                        <strong>{traitLabels[secondTrait]}</strong>
+                      </li>
+                    </ol>
+                  </div>
+                </section>
 
-              <section
-                className="profile-section"
-                style={{
-                  marginTop: "20px",
-                  marginBottom: 0,
-                }}
-              >
-                <div className="profile-section-header">
-                  <span className="profile-eyebrow">
-                    IMAGE MEANING
-                  </span>
+                {/* 이미지 설명 */}
 
-                  <h2>
-                    이 이미지는 무엇을
-                    표현했을까요?
-                  </h2>
-                </div>
-
-                <p
-                  style={{
-                    lineHeight: 1.9,
-                    margin: 0,
-                  }}
+                <section
+                  className="profile-section image-meaning"
                 >
-                  이 이미지는 당신에게
-                  두드러진
-                  {" "}
-                  <strong>
-                    {
-                      traitLabels[
-                        firstTrait
-                      ]
-                    }
-                  </strong>
-                  과
-                  {" "}
-                  <strong>
-                    {
-                      traitLabels[
-                        secondTrait
-                      ]
-                    }
-                  </strong>
-                  의 조합을 바탕으로
-                  만들어졌습니다.
-                  {" "}
-                  {profile.name}에게
-                  나타나는 생각과 관계,
-                  감정, 행동의 특징을
-                  색과 형태, 균형감,
-                  추상적인 구성으로
-                  표현한 이미지입니다.
-                </p>
-              </section>
+                  <div className="profile-section-header">
+                    <span className="profile-eyebrow">
+                      IMAGE MEANING
+                    </span>
 
-              {/* 결과 카드 저장/휴대폰 전송 */}
+                    <h2>
+                      이 이미지는 무엇을
+                      표현했을까요?
+                    </h2>
+                  </div>
 
-              <section
-                className="result-card-tools"
-                aria-labelledby="result-card-tools-heading"
-              >
-                <div className="result-card-tools-header">
-                  <span className="profile-eyebrow">TAKE IT WITH YOU</span>
-                  <h2 id="result-card-tools-heading">결과 카드를 간직하세요</h2>
                   <p>
-                    결과 유형과 상위 성향, AI 이미지만 담은 한 장의 PNG 카드로
-                    저장할 수 있어요.
+                    이 이미지는 당신에게
+                    두드러진
+                    {" "}
+                    <strong>
+                      {
+                        traitLabels[
+                          firstTrait
+                        ]
+                      }
+                    </strong>
+                    과
+                    {" "}
+                    <strong>
+                      {
+                        traitLabels[
+                          secondTrait
+                        ]
+                      }
+                    </strong>
+                    의 조합을 바탕으로
+                    만들어졌습니다.
+                    {" "}
+                    {profile.name}에게
+                    나타나는 생각과 관계,
+                    감정, 행동의 특징을
+                    색과 형태, 균형감,
+                    추상적인 구성으로
+                    표현한 이미지입니다.
                   </p>
-                </div>
+                </section>
 
-                <div className="result-card-tool-actions">
-                  <button
-                    className="primary-button"
-                    type="button"
-                    onClick={() => void saveResultCard()}
-                    disabled={cardAction !== null || imageAction !== null}
-                  >
-                    {cardAction === "save"
-                      ? "카드 만드는 중..."
-                      : "결과 카드 저장하기"}
-                  </button>
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => void showPhoneQr()}
-                    disabled={cardAction !== null || imageAction !== null}
-                  >
-                    {cardAction === "qr"
-                      ? "QR 준비 중..."
-                      : "휴대폰으로 가져가기"}
-                  </button>
-                </div>
+                {/* 결과 카드 저장/휴대폰 전송 */}
 
-                {cardActionMessage && (
-                  <p className="image-action-message" aria-live="polite">
-                    {cardActionMessage}
-                  </p>
-                )}
+                <section
+                  className="result-card-tools"
+                  aria-labelledby="result-card-tools-heading"
+                >
+                  <div className="result-card-tools-header">
+                    <span className="profile-eyebrow">TAKE IT WITH YOU</span>
+                    <h2 id="result-card-tools-heading">결과 카드를 간직하세요</h2>
+                    <p>
+                      결과 유형과 상위 성향, AI 이미지만 담은 한 장의 PNG 카드로
+                      저장할 수 있어요.
+                    </p>
+                  </div>
 
-                {isQrVisible && cardShareData && (
-                  <div className="qr-share-panel" aria-live="polite">
-                    <div className="qr-share-copy">
-                      <span className="profile-eyebrow">SCAN WITH YOUR PHONE</span>
-                      <h3>휴대폰 카메라로 QR을 스캔하세요</h3>
-                      <p>
-                        휴대폰에서 결과 카드를 열어 PNG로 저장할 수 있습니다. 링크는
-                        24시간 후 자동으로 만료됩니다.
-                      </p>
-                      <p className="qr-share-expiry">
-                        만료 예정: {new Date(cardShareData.expiresAt).toLocaleString("ko-KR")}
-                      </p>
-                      <div className="qr-share-url-block">
-                        <span>QR에 포함된 주소</span>
+                  <div className="result-card-tool-actions">
+                    <button
+                      className="primary-button"
+                      type="button"
+                      onClick={() => void saveResultCard()}
+                      disabled={cardAction !== null || imageAction !== null}
+                    >
+                      {cardAction === "save"
+                        ? "카드 만드는 중..."
+                        : "결과 카드 저장하기"}
+                    </button>
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => void showPhoneQr()}
+                      disabled={cardAction !== null || imageAction !== null}
+                    >
+                      {cardAction === "qr"
+                        ? "QR 준비 중..."
+                        : "휴대폰으로 가져가기"}
+                    </button>
+                  </div>
+
+                  {cardActionMessage && (
+                    <p className="image-action-message" aria-live="polite">
+                      {cardActionMessage}
+                    </p>
+                  )}
+
+                  {isQrVisible && cardShareData && (
+                    <div className="qr-share-panel" aria-live="polite">
+                      <div className="qr-share-copy">
+                        <span className="profile-eyebrow">SCAN WITH YOUR PHONE</span>
+                        <h3>휴대폰 카메라로 QR을 스캔하세요</h3>
+                        <p>
+                          휴대폰에서 결과 카드를 열어 PNG로 저장할 수 있습니다. 링크는
+                          24시간 후 자동으로 만료됩니다.
+                        </p>
+                        <p className="qr-share-expiry">
+                          만료 예정: {new Date(cardShareData.expiresAt).toLocaleString("ko-KR")}
+                        </p>
+                        <div className="qr-share-url-block">
+                          <span>QR에 포함된 주소</span>
+                          <a
+                            href={cardShareData.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {cardShareData.url}
+                          </a>
+                        </div>
+                        {isLoopbackUrl(cardShareData.url) && (
+                          <p className="qr-local-warning" role="alert">
+                            현재 QR은 localhost 주소입니다. 휴대폰에서는 연결되지
+                            않습니다. Vercel 배포 주소에서 다시 생성하거나, 같은
+                            Wi-Fi에서 이 페이지를 PC의 네트워크 주소로 열어주세요.
+                          </p>
+                        )}
+                      </div>
+                      <div className="qr-code-wrap">
+                        <Image
+                          src={cardShareData.qrCode}
+                          alt="휴대폰에서 결과 카드를 여는 QR 코드"
+                          width={240}
+                          height={240}
+                          unoptimized
+                        />
+                      </div>
+                      <div className="qr-share-actions">
                         <a
+                          className="secondary-button"
                           href={cardShareData.url}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          {cardShareData.url}
+                          공유 페이지 미리보기
                         </a>
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => void copyShareLink()}
+                        >
+                          링크 복사하기
+                        </button>
+                        <button
+                          className="ghost-button"
+                          type="button"
+                          onClick={() => setIsQrVisible(false)}
+                        >
+                          QR 닫기
+                        </button>
                       </div>
-                      {isLoopbackUrl(cardShareData.url) && (
-                        <p className="qr-local-warning" role="alert">
-                          현재 QR은 localhost 주소입니다. 휴대폰에서는 연결되지
-                          않습니다. Vercel 배포 주소에서 다시 생성하거나, 같은
-                          Wi-Fi에서 이 페이지를 PC의 네트워크 주소로 열어주세요.
-                        </p>
-                      )}
-                    </div>
-                    <div className="qr-code-wrap">
-                      <Image
-                        src={cardShareData.qrCode}
-                        alt="휴대폰에서 결과 카드를 여는 QR 코드"
-                        width={240}
-                        height={240}
-                        unoptimized
-                      />
-                    </div>
-                    <div className="qr-share-actions">
-                      <a
-                        className="secondary-button"
-                        href={cardShareData.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        공유 페이지 미리보기
-                      </a>
-                      <button
-                        className="secondary-button"
-                        type="button"
-                        onClick={() => void copyShareLink()}
-                      >
-                        링크 복사하기
-                      </button>
-                      <button
-                        className="ghost-button"
-                        type="button"
-                        onClick={() => setIsQrVisible(false)}
-                      >
-                        QR 닫기
-                      </button>
-                    </div>
                   </div>
                 )}
               </section>
@@ -1071,8 +1060,9 @@ export default function ResultImagePage() {
                 >
                   이미지 다시 생성하기
                 </button>
+                </div>
               </div>
-            </>
+            </div>
           )}
 
         {/* 실패 */}
